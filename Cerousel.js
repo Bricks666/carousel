@@ -5,7 +5,7 @@ class Slider {
   #nextButton;
   #prevButton;
 
-  constructor(config = {}) {
+  constructor() {
     this.#carousel = document.querySelector(".carousel");
     this.#slidesContainer = new SlidesContainer(
       this.#carousel.querySelector(".carousel__slides")
@@ -13,6 +13,16 @@ class Slider {
 
     this.#nextButton = this.#carousel.querySelector(".carousel__button--next");
     this.#prevButton = this.#carousel.querySelector(".carousel__button--prev");
+  }
+
+  initialization(config = {}) {
+    this.#slidesContainer.initialization({
+      motionCoefficient: 1,
+      gap: 20,
+    });
+
+    this.#nextButton.onclick = this.#next.bind(this);
+    this.#prevButton.onclick = this.#prev.bind(this);
 
     this.#prevButton.disabled = true;
 
@@ -29,16 +39,6 @@ class Slider {
     this.#slidesContainer.addEventListener("notStartSlide", () => {
       this.#prevButton.disabled = false;
     });
-  }
-
-  initialization() {
-    this.#slidesContainer.initialization({
-      motionCoefficient: 1,
-      gap: 20,
-    });
-
-    this.#nextButton.onclick = this.#next.bind(this);
-    this.#prevButton.onclick = this.#prev.bind(this);
   }
 
   #next() {
@@ -115,21 +115,25 @@ class SlidesContainer {
       evt.preventDefault();
       evt.stopPropagation();
 
+      if (this.#drag.lastXPosition === 0) {
+        this.#drag.lastXPosition = evt.clientX;
+        return;
+      }
+
       const xPositionDifferent = this.#drag.lastXPosition - evt.clientX;
+      const accelerationCoefficient = Math.abs(xPositionDifferent / 20);
+      const motion = this.#configuration.dragMotion * accelerationCoefficient;
 
       if (
         xPositionDifferent > this.#configuration.dragSensitiveCoefficient &&
         this.#service.isLastSlide === false
       ) {
-        console.log("To forward", xPositionDifferent);
-        this.moveSlidesForward(this.#configuration.dragMotion);
+        this.moveSlidesForward(motion);
       } else if (
         xPositionDifferent < -this.#configuration.dragSensitiveCoefficient &&
         this.#service.isFirstSlide == false
       ) {
-        console.log("To back", xPositionDifferent);
-
-        this.moveSlidesBack(this.#configuration.dragMotion);
+        this.moveSlidesBack(motion);
       }
 
       this.#drag.lastXPosition = evt.clientX;
@@ -207,12 +211,10 @@ class SlidesContainer {
 
 class Slide {
   #element;
-  #number;
 
   constructor(slide, number) {
     this.#element = slide;
     this.#element.draggable = true;
-    this.#number = number;
   }
 
   move(motion) {

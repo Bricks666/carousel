@@ -60,9 +60,9 @@
 
     transition-property: left;
     transition-duration: 0.25s;
-    transition-timing-function: linear;
+    transition-timing-function: ;
 }
-/*
+
 .carousel__content {
     display: inline-block;
 
@@ -72,7 +72,7 @@
     object-fit: cover;
 
     background-color: aqua;
-} */
+}
 
 .carousel__button {
     width: 100px;
@@ -84,4 +84,11 @@
 
 .carousel__slide:nth-child(n + 5) .carousel__content {
     background-color: tomato;
+}
+
+.carousel__slide:nth-child(n + 10) .carousel__content {
+    background-color: plum;
+}
+.carousel__slide:nth-child(n + 15) .carousel__content {
+    background-color: wheat;
 }
