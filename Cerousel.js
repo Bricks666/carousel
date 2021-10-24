@@ -63,6 +63,8 @@ class SlidesContainer {
     loop: false,
     motion: 0,
     slideWidth: 0,
+    dragMotion: 0,
+    dragSensitiveCoefficient: 10,
   };
 
   #service = {
@@ -71,29 +73,12 @@ class SlidesContainer {
   };
 
   #drag = {
-    deltaX: 0,
+    lastXPosition: 0,
   };
 
   constructor(container) {
     this.#container = container;
-    container.ondragover = container.ondragleave = (evt) => {
-      evt.preventDefault();
 
-      console.log(evt.clientX, this.#drag.deltaX);
-
-      this.#drag.deltaX = evt.clientX - this.#drag.deltaX;
-
-      if (this.#drag.deltaX > 0 && this.#service.isLastSlide === false) {
-        this.moveSlidesForward(this.#drag.deltaX);
-      } else if (this.#drag.deltaX < 0 && this.#service.isFirstSlide == false) {
-        this.moveSlidesBack(-this.#drag.deltaX);
-      }
-    };
-
-    container.addEventListener("dragend", (evt) => {
-      evt.preventDefault();
-      this.#drag.deltaX = 0;
-    });
     const nodeSlides = this.#container.querySelectorAll(".carousel__slide");
 
     for (let nodeSlide of nodeSlides.entries()) {
@@ -102,6 +87,8 @@ class SlidesContainer {
 
     this.#firstSlide = this.#slides[0];
     this.#lastSlide = this.#slides[this.#slides.length - 1];
+
+    this.#dragSubscribe();
   }
 
   get width() {
@@ -123,6 +110,38 @@ class SlidesContainer {
     );
   }
 
+  #dragSubscribe() {
+    this.#container.ondragover = (evt) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+
+      const xPositionDifferent = this.#drag.lastXPosition - evt.clientX;
+
+      if (
+        xPositionDifferent > this.#configuration.dragSensitiveCoefficient &&
+        this.#service.isLastSlide === false
+      ) {
+        console.log("To forward", xPositionDifferent);
+        this.moveSlidesForward(this.#configuration.dragMotion);
+      } else if (
+        xPositionDifferent < -this.#configuration.dragSensitiveCoefficient &&
+        this.#service.isFirstSlide == false
+      ) {
+        console.log("To back", xPositionDifferent);
+
+        this.moveSlidesBack(this.#configuration.dragMotion);
+      }
+
+      this.#drag.lastXPosition = evt.clientX;
+    };
+
+    this.#container.addEventListener("dragend", (evt) => {
+      evt.preventDefault();
+
+      this.#drag.lastXPosition = 0;
+    });
+  }
+
   initialization(config = {}) {
     this.#configuration.slideWidth = this.#firstSlide.width;
 
@@ -131,6 +150,8 @@ class SlidesContainer {
     this.#configuration.motion =
       (this.#configuration.slideWidth + this.#configuration.gap) *
       this.#configuration.motionCoefficient;
+
+    this.#configuration.dragMotion = this.#configuration.motion / 2;
 
     this.#slides.forEach((slide, index) => {
       slide.move(
@@ -161,9 +182,9 @@ class SlidesContainer {
     });
   }
 
-  moveSlidesBack() {
+  moveSlidesBack(motion) {
     const currentMotion = Math.min(
-      this.#configuration.motion,
+      motion || this.#configuration.motion,
       this.#distanceToLeftBorder
     );
 
