@@ -1,0 +1,87 @@
+* {
+    box-sizing: border-box;
+}
+
+/* CONTAINER */
+.container {
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* PAGE */
+.page {
+    background-color: plum;
+
+    font-size: 14px;
+    line-height: 1.5em;
+    font-weight: 500;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.page__header {
+    padding: 50px 20px;
+}
+
+.page__main {
+    padding: 50px 20px;
+}
+
+/* CAROUSEL */
+.carousel {
+    display: flex;
+
+    align-items: center;
+
+    padding: 0;
+    margin: 0;
+}
+
+.carousel__slides {
+    position: relative;
+
+    height: 150px;
+    width: 100%;
+
+    margin: 20px;
+    padding: 0;
+
+    list-style: none;
+
+    overflow: hidden;
+}
+
+.carousel__slide {
+    position: absolute;
+
+    height: 100%;
+    width: 150px;
+
+    background-color: #fff;
+
+    transition-property: left;
+    transition-duration: 0.25s;
+    transition-timing-function: linear;
+}
+/*
+.carousel__content {
+    display: inline-block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    background-color: aqua;
+} */
+
+.carousel__button {
+    width: 100px;
+    height: 100px;
+
+    border-radius: 0;
+    border: none;
+}
+
+.carousel__slide:nth-child(n + 5) .carousel__content {
+    background-color: tomato;
+}
