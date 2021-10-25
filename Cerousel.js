@@ -1,233 +1,235 @@
 class Slider {
-  #carousel;
-  #slidesContainer;
+	#carousel;
+	#slidesContainer;
 
-  #nextButton;
-  #prevButton;
+	#nextButton;
+	#prevButton;
 
-  constructor() {
-    this.#carousel = document.querySelector(".carousel");
-    this.#slidesContainer = new SlidesContainer(
-      this.#carousel.querySelector(".carousel__slides")
-    );
+	constructor() {
+		this.#carousel = document.querySelector(".carousel");
+		this.#slidesContainer = new SlidesContainer(
+			this.#carousel.querySelector(".carousel__slides")
+		);
 
-    this.#nextButton = this.#carousel.querySelector(".carousel__button--next");
-    this.#prevButton = this.#carousel.querySelector(".carousel__button--prev");
-  }
+		this.#nextButton = this.#carousel.querySelector(".carousel__button--next");
+		this.#prevButton = this.#carousel.querySelector(".carousel__button--prev");
+	}
 
-  initialization(config = {}) {
-    this.#slidesContainer.initialization({
-      motionCoefficient: 1,
-      gap: 20,
-    });
+	initialization(config = {}) {
+		this.#slidesContainer.initialization({
+			motionCoefficient: 1,
+			gap: 20,
+		});
 
-    this.#nextButton.onclick = this.#next.bind(this);
-    this.#prevButton.onclick = this.#prev.bind(this);
+		this.#nextButton.onclick = this.#next.bind(this);
+		this.#prevButton.onclick = this.#prev.bind(this);
 
-    this.#prevButton.disabled = true;
+		this.#prevButton.disabled = true;
 
-    this.#slidesContainer.addEventListener("endSlide", () => {
-      this.#nextButton.disabled = true;
-    });
-    this.#slidesContainer.addEventListener("notEndSlide", () => {
-      this.#nextButton.disabled = false;
-    });
+		this.#slidesContainer.addEventListener("endSlide", () => {
+			this.#nextButton.disabled = true;
+		});
+		this.#slidesContainer.addEventListener("notEndSlide", () => {
+			this.#nextButton.disabled = false;
+		});
 
-    this.#slidesContainer.addEventListener("startSlide", () => {
-      this.#prevButton.disabled = true;
-    });
-    this.#slidesContainer.addEventListener("notStartSlide", () => {
-      this.#prevButton.disabled = false;
-    });
-  }
+		this.#slidesContainer.addEventListener("startSlide", () => {
+			this.#prevButton.disabled = true;
+		});
+		this.#slidesContainer.addEventListener("notStartSlide", () => {
+			this.#prevButton.disabled = false;
+		});
+	}
 
-  #next() {
-    this.#slidesContainer.moveSlidesForward();
-  }
+	#next() {
+		this.#slidesContainer.moveSlidesForward();
+	}
 
-  #prev() {
-    this.#slidesContainer.moveSlidesBack();
-  }
+	#prev() {
+		this.#slidesContainer.moveSlidesBack();
+	}
 }
 
 class SlidesContainer {
-  #container;
+	#container;
 
-  #slides = [];
-  #firstSlide;
-  #lastSlide;
+	#slides = [];
+	#firstSlide;
+	#lastSlide;
 
-  #configuration = {
-    motionCoefficient: 1,
-    gap: 0,
-    loop: false,
-    motion: 0,
-    slideWidth: 0,
-    dragMotion: 0,
-    dragSensitiveCoefficient: 10,
-  };
+	#configuration = {
+		motionCoefficient: 1,
+		gap: 0,
+		loop: false,
+		motion: 0,
+		slideWidth: 0,
+		dragMotion: 0,
+		dragSensitiveCoefficient: 10,
+	};
 
-  #service = {
-    isLastSlide: false,
-    isFirstSlide: true,
-  };
+	#service = {
+		isLastSlide: false,
+		isFirstSlide: true,
+	};
 
-  #drag = {
-    lastXPosition: 0,
-  };
+	#drag = {
+		lastXPosition: 0,
+	};
 
-  constructor(container) {
-    this.#container = container;
+	constructor(container) {
+		this.#container = container;
 
-    const nodeSlides = this.#container.querySelectorAll(".carousel__slide");
+		const nodeSlides = this.#container.querySelectorAll(".carousel__slide");
 
-    for (let nodeSlide of nodeSlides.entries()) {
-      this.#slides.push(new Slide(nodeSlide[1], nodeSlide[0]));
-    }
+		for (let nodeSlide of nodeSlides.entries()) {
+			this.#slides.push(new Slide(nodeSlide[1], nodeSlide[0]));
+		}
 
-    this.#firstSlide = this.#slides[0];
-    this.#lastSlide = this.#slides[this.#slides.length - 1];
+		this.#firstSlide = this.#slides[0];
+		this.#lastSlide = this.#slides[this.#slides.length - 1];
 
-    this.#dragSubscribe();
-  }
+		this.#dragSubscribe();
+	}
 
-  get width() {
-    return parseFloat(getComputedStyle(this.#container).width);
-  }
+	get width() {
+		return parseFloat(getComputedStyle(this.#container).width);
+	}
 
-  get addEventListener() {
-    return this.#container.addEventListener.bind(this.#container);
-  }
+	get addEventListener() {
+		return this.#container.addEventListener.bind(this.#container);
+	}
 
-  get #distanceToLeftBorder() {
-    return -this.#firstSlide.distanceToBorder(0, 0);
-  }
+	get #distanceToLeftBorder() {
+		return -this.#firstSlide.distanceToBorder(0, 0);
+	}
 
-  get #distanceToRightBorder() {
-    return this.#lastSlide.distanceToBorder(
-      this.width,
-      this.#configuration.slideWidth
-    );
-  }
+	get #distanceToRightBorder() {
+		return this.#lastSlide.distanceToBorder(
+			this.width,
+			this.#configuration.slideWidth
+		);
+	}
 
-  #dragSubscribe() {
-    this.#container.ondragover = (evt) => {
-      evt.preventDefault();
-      evt.stopPropagation();
+	#dragSubscribe() {
+		this.#container.ondragover = (evt) => {
+			evt.preventDefault();
+			evt.stopPropagation();
 
-      if (this.#drag.lastXPosition === 0) {
-        this.#drag.lastXPosition = evt.clientX;
-        return;
-      }
+			if (this.#drag.lastXPosition === 0) {
+				this.#drag.lastXPosition = evt.clientX;
+				return;
+			}
 
-      const xPositionDifferent = this.#drag.lastXPosition - evt.clientX;
-      const accelerationCoefficient = Math.abs(xPositionDifferent / 20);
-      const motion = this.#configuration.dragMotion * accelerationCoefficient;
+			const xPositionDifferent = this.#drag.lastXPosition - evt.clientX;
+			const accelerationCoefficient = Math.abs(xPositionDifferent / 20);
+			const motion = this.#configuration.dragMotion * accelerationCoefficient;
 
-      if (
-        xPositionDifferent > this.#configuration.dragSensitiveCoefficient &&
-        this.#service.isLastSlide === false
-      ) {
-        this.moveSlidesForward(motion);
-      } else if (
-        xPositionDifferent < -this.#configuration.dragSensitiveCoefficient &&
-        this.#service.isFirstSlide == false
-      ) {
-        this.moveSlidesBack(motion);
-      }
+			if (
+				xPositionDifferent > this.#configuration.dragSensitiveCoefficient &&
+				this.#service.isLastSlide === false
+			) {
+				this.moveSlidesForward(motion);
+			} else if (
+				xPositionDifferent < -this.#configuration.dragSensitiveCoefficient &&
+				this.#service.isFirstSlide == false
+			) {
+				this.moveSlidesBack(motion);
+			}
 
-      this.#drag.lastXPosition = evt.clientX;
-    };
+			this.#drag.lastXPosition = evt.clientX;
+		};
 
-    this.#container.addEventListener("dragend", (evt) => {
-      evt.preventDefault();
+		this.#container.addEventListener("dragend", (evt) => {
+			evt.preventDefault();
 
-      this.#drag.lastXPosition = 0;
-    });
-  }
+			this.#drag.lastXPosition = 0;
+		});
+	}
 
-  initialization(config = {}) {
-    this.#configuration.slideWidth = this.#firstSlide.width;
+	initialization(config = {}) {
+		this.#configuration.slideWidth = this.#firstSlide.width;
 
-    Object.assign(this.#configuration, config);
+		Object.assign(this.#configuration, config);
 
-    this.#configuration.motion =
-      (this.#configuration.slideWidth + this.#configuration.gap) *
-      this.#configuration.motionCoefficient;
+		this.#configuration.motion =
+			(this.#configuration.slideWidth + this.#configuration.gap) *
+			this.#configuration.motionCoefficient;
 
-    this.#configuration.dragMotion = this.#configuration.motion / 2;
+		this.#configuration.dragMotion = this.#configuration.motion / 2;
 
-    this.#slides.forEach((slide, index) => {
-      slide.move(
-        (this.#configuration.slideWidth + this.#configuration.gap) * index
-      );
-    });
-  }
+		this.#slides.forEach((slide, index) => {
+			slide.move(
+				(this.#configuration.slideWidth + this.#configuration.gap) * index
+			);
+		});
+	}
 
-  moveSlidesForward(motion) {
-    const currentMotion = Math.min(
-      motion || this.#configuration.motion,
-      this.#distanceToRightBorder
-    );
+	moveSlidesForward(motion) {
+		const currentMotion = Math.min(
+			motion || this.#configuration.motion,
+			this.#distanceToRightBorder
+		);
 
-    if (currentMotion <= 0) {
-      this.#container.dispatchEvent(new Event("endSlide"));
-      this.#service.isLastSlide = true;
-      return;
-    }
+		if (currentMotion <= 0) {
+			this.#container.dispatchEvent(new Event("endSlide"));
+			this.#service.isLastSlide = true;
+			return;
+		}
 
-    if (this.#service.isFirstSlide) {
-      this.#container.dispatchEvent(new Event("notStartSlide"));
-      this.#service.isFirstSlide = false;
-    }
+		if (this.#service.isFirstSlide) {
+			this.#container.dispatchEvent(new Event("notStartSlide"));
+			this.#service.isFirstSlide = false;
+		}
 
-    this.#slides.forEach((slide) => {
-      slide.move(-currentMotion);
-    });
-  }
+		this.#slides.forEach((slide) => {
+			slide.move(-currentMotion);
+		});
+	}
 
-  moveSlidesBack(motion) {
-    const currentMotion = Math.min(
-      motion || this.#configuration.motion,
-      this.#distanceToLeftBorder
-    );
+	moveSlidesBack(motion) {
+		const currentMotion = Math.min(
+			motion || this.#configuration.motion,
+			this.#distanceToLeftBorder
+		);
 
-    if (currentMotion <= 0) {
-      this.#container.dispatchEvent(new Event("startSlide"));
-      this.#service.isFirstSlide = true;
-      return;
-    }
+		if (currentMotion <= 0) {
+			this.#container.dispatchEvent(new Event("startSlide"));
+			this.#service.isFirstSlide = true;
+			return;
+		}
 
-    if (this.#service.isLastSlide) {
-      this.#container.dispatchEvent(new Event("notEndSlide"));
-      this.#service.isLastSlide = false;
-    }
+		if (this.#service.isLastSlide) {
+			this.#container.dispatchEvent(new Event("notEndSlide"));
+			this.#service.isLastSlide = false;
+		}
 
-    this.#slides.forEach((slide) => {
-      slide.move(currentMotion);
-    });
-  }
+		this.#slides.forEach((slide) => {
+			slide.move(currentMotion);
+		});
+	}
 }
 
 class Slide {
-  #element;
+	#element;
 
-  constructor(slide, number) {
-    this.#element = slide;
-    this.#element.draggable = true;
-  }
+	constructor(slide, number) {
+		this.#element = slide;
+		this.#element.draggable = true;
 
-  move(motion) {
-    this.#element.style.left = `${
-      parseFloat(this.#element.style.left || 0) + motion
-    }px`;
-  }
+		this.#element.innerHTML = number;
+	}
 
-  distanceToBorder(border, slideWidth) {
-    return parseFloat(this.#element.style.left) - (border - slideWidth);
-  }
+	move(motion) {
+		this.#element.style.left = `${
+			parseFloat(this.#element.style.left || 0) + motion
+		}px`;
+	}
 
-  get width() {
-    return parseFloat(getComputedStyle(this.#element).width);
-  }
+	distanceToBorder(border, slideWidth) {
+		return parseFloat(this.#element.style.left) - (border - slideWidth);
+	}
+
+	get width() {
+		return parseFloat(getComputedStyle(this.#element).width);
+	}
 }
