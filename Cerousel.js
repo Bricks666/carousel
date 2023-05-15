@@ -111,14 +111,13 @@ class SlidesContainer {
 	}
 
 	#dragSubscribe() {
+		this.#container.ondragstart = (evt) => {
+			this.#drag.lastXPosition = evt.clientX;
+		};
+
 		this.#container.ondragover = (evt) => {
 			evt.preventDefault();
 			evt.stopPropagation();
-
-			if (this.#drag.lastXPosition === 0) {
-				this.#drag.lastXPosition = evt.clientX;
-				return;
-			}
 
 			const xPositionDifferent = this.#drag.lastXPosition - evt.clientX;
 			const accelerationCoefficient = Math.abs(xPositionDifferent / 20);
@@ -139,11 +138,11 @@ class SlidesContainer {
 			this.#drag.lastXPosition = evt.clientX;
 		};
 
-		this.#container.addEventListener("dragend", (evt) => {
+		this.#container.ondragend = (evt) => {
 			evt.preventDefault();
 
 			this.#drag.lastXPosition = 0;
-		});
+		};
 	}
 
 	initialization(config = {}) {
